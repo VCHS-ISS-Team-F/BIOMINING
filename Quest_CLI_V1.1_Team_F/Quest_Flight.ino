@@ -64,7 +64,7 @@ Files Required to make a complete program -
 //
 //
 uint16_t Wait24hour = 1;         // 0 = wait 24hour   1=Do not Wair 24 hour.
-#define SpeedFactor 30          // = times faster
+#define SpeedFactor 60          // = times faster
 uint32_t  secperday =  86400;  //number of seconds in a day for wait time
 //
 //
@@ -88,10 +88,15 @@ uint32_t  secperday =  86400;  //number of seconds in a day for wait time
     //============  routins to support Ph value   ============
     //
     //
+      // float mid_cal = 1704;
+      // float low_cal = 1783;
+      // float high_cal = 1624;
+      // float voltage_mV = 0;
       float mid_cal = 1705;
       float low_cal = 1785;
       float high_cal = 1624;
       float voltage_mV = 0;
+    //  
     //  
     // 
 float read_voltage() {
@@ -109,7 +114,6 @@ float ph(float voltage_mV) {
   } else {
     return 7.0 - 3.0 / (mid_cal - high_cal) * (voltage_mV -mid_cal);
   }
-  Serial.print("fm ph(float voltage"); Serial.println(voltage_mV);
 }
 // ===============  end of support of Ph  ==================
 //
@@ -262,11 +266,19 @@ void Flying() {
       float ph_value = 0;
       voltage_mV = read_voltage();
       Serial.print(voltage_mV);Serial.println(" mV");
+      
       ph_value = ph(voltage_mV);
       Serial.print("Ph value = ");Serial.println(ph_value);      
       uint16_t intPh = ph_value*100;
       int Ph  = intPh;
-      add2text(sensor1count, Ph);       //add the values to the text buffer
+      uint16_t intMV = int(round(voltage_mV*100));
+      Serial.println(voltage_mV*100);
+      Serial.println(int(round(voltage_mV*100)));
+      Serial.println(intMV);
+
+      int mmV = int(round(voltage_mV*100));
+      Serial.println(mmV);
+      add2text(sensor1count, Ph,mmV);       //add the values to the text buffer
       //    
     }     // End of Sensor1 time event
 
@@ -325,7 +337,7 @@ void Flying() {
 //
 char text_buffer[10]; // Adjust the size based on the expected length of the string         
 //
-void add2text(int value1,int value2){                 //Add value to text file
+void add2text(int value1,int value2,int mV){                 //Add value to text file
       Serial.print(value1);Serial.print("  ");Serial.println(value2);
         if (strlen(user_text_buf0) >= (sizeof(user_text_buf0)-100)){    //Check for full
           Serial.println("text buffer full");                           //yes, say so
@@ -365,6 +377,8 @@ void add2text(int value1,int value2){                 //Add value to text file
         strcat(user_text_buf0, (itoa(value1, ascii, 10)));
         strcat(user_text_buf0, ("Ph="));
         strcat(user_text_buf0, (itoa(value2, ascii, 10)));       
+        strcat(user_text_buf0, ("mV="));
+        strcat(user_text_buf0, (itoa(mV, ascii, 10)));      
         strcat(user_text_buf0, ("\r\n"));
 
         //Serial.println(strlen(user_text_buf0));  //for testing
